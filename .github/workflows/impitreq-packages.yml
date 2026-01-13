@@ -110,7 +110,13 @@ jobs:
           VERSION: ${{ steps.ver.outputs.version }}
         run: |
           set -euo pipefail
-          VERSION="$VERSION" node -e "const fs=require('fs'); const p='${{ matrix.platform_pkg_dir }}/package.json'; const j=JSON.parse(fs.readFileSync(p,'utf8')); j.version=process.env.VERSION; fs.writeFileSync(p, JSON.stringify(j,null,2)+'\n');"
+          if [[ -n "${VERSION:-}" ]]; then
+            VERSION="$VERSION" node -e "const fs=require('fs'); const p='${{ matrix.platform_pkg_dir }}/package.json'; const j=JSON.parse(fs.readFileSync(p,'utf8')); if(!j.name) throw new Error('package.json missing name'); j.version=process.env.VERSION; fs.writeFileSync(p, JSON.stringify(j,null,2)+'\n');"
+          else
+            echo "No VERSION provided; keep existing ${{
+              matrix.platform_pkg_dir
+            }}/package.json version"
+          fi
 
       - name: Pack artifacts
         shell: bash
@@ -163,7 +169,11 @@ jobs:
           VERSION: ${{ steps.ver.outputs.version }}
         run: |
           set -euo pipefail
-          VERSION="$VERSION" node -e "const fs=require('fs'); const p='impitreq/package.json'; const j=JSON.parse(fs.readFileSync(p,'utf8')); j.version=process.env.VERSION; j.optionalDependencies['impitreq-win32-x64']=process.env.VERSION; j.optionalDependencies['impitreq-linux-x64']=process.env.VERSION; j.optionalDependencies['impitreq-darwin-x64']=process.env.VERSION; fs.writeFileSync(p, JSON.stringify(j,null,2)+'\n');"
+          if [[ -n "${VERSION:-}" ]]; then
+            VERSION="$VERSION" node -e "const fs=require('fs'); const p='impitreq/package.json'; const j=JSON.parse(fs.readFileSync(p,'utf8')); if(!j.name) throw new Error('package.json missing name'); j.version=process.env.VERSION; j.optionalDependencies['impitreq-win32-x64']=process.env.VERSION; j.optionalDependencies['impitreq-linux-x64']=process.env.VERSION; j.optionalDependencies['impitreq-darwin-x64']=process.env.VERSION; fs.writeFileSync(p, JSON.stringify(j,null,2)+'\n');"
+          else
+            echo 'No VERSION provided; keep existing impitreq/package.json version and optionalDependencies'
+          fi
 
       - name: Pack artifacts
         shell: bash

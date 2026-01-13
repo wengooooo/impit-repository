@@ -67,11 +67,27 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if [[ -d "./pkg/impit/cmd/impitreq" ]]; then
-            echo "exists=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "exists=false" >> "$GITHUB_OUTPUT"
+          SRC_DIR="./pkg/impit/cmd/impitreq"
+          EXISTS="false"
+          HAS_GO_FILES="false"
+          HAS_GO_MOD="false"
+          if [[ -d "$SRC_DIR" ]]; then
+            EXISTS="true"
+            if find "$SRC_DIR" -type f -name '*.go' | grep -q .; then
+              HAS_GO_FILES="true"
+            fi
           fi
+          if [[ -f "./go.mod" || -f "$SRC_DIR/go.mod" ]]; then
+            HAS_GO_MOD="true"
+          fi
+          CAN_BUILD="false"
+          if [[ "$EXISTS" == "true" && "$HAS_GO_FILES" == "true" && "$HAS_GO_MOD" == "true" ]]; then
+            CAN_BUILD="true"
+          fi
+          echo "exists=$EXISTS" >> "$GITHUB_OUTPUT"
+          echo "has_go_files=$HAS_GO_FILES" >> "$GITHUB_OUTPUT"
+          echo "has_go_mod=$HAS_GO_MOD" >> "$GITHUB_OUTPUT"
+          echo "can_build=$CAN_BUILD" >> "$GITHUB_OUTPUT"
 
       - name: Build shared library (Windows)
         if: runner.os == 'Windows'
@@ -81,15 +97,15 @@ jobs:
           CC: C:\msys64\mingw64\bin\gcc.exe
         run: |
           $ErrorActionPreference = 'Stop'
-          if ('${{ steps.checksrc.outputs.exists }}' -ne 'true') {
-            Write-Host 'Source missing, skip build (Windows)'
+          if ('${{ steps.checksrc.outputs.can_build }}' -ne 'true') {
+            Write-Host 'Skipping Windows build: missing source/go files/go.mod'
             exit 0
           }
           New-Item -ItemType Directory -Force -Path "${{ matrix.platform_pkg_dir }}" | Out-Null
           go build -tags cshared -buildmode c-shared -mod mod -o "${{ matrix.platform_pkg_dir }}/${{ matrix.out_name }}" ./pkg/impit/cmd/impitreq
 
       - name: Build shared library (Unix)
-        if: runner.os != 'Windows' && steps.checksrc.outputs.exists == 'true'
+        if: runner.os != 'Windows' && steps.checksrc.outputs.can_build == 'true'
         shell: bash
         run: |
           set -euo pipefail

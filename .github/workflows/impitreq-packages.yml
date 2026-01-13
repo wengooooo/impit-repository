@@ -248,3 +248,37 @@ jobs:
         run: |
           set -euo pipefail
           npm publish "./impitreq"
+
+  verify:
+    runs-on: windows-latest
+    needs: main
+    steps:
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Download main package artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: impitreq-main
+          path: verify
+      - name: Install koffi and package, then verify load
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          cd verify
+          npm init -y
+          npm i koffi
+          $tgz = Get-ChildItem -Filter "impitreq-*.tgz" | Select-Object -First 1
+          if (-not $tgz) { throw "impitreq tgz not found in verify/" }
+          npm i "./$($tgz.Name)"
+          node -e @"
+          const fs = require('fs');
+          const koffi = require('koffi');
+          const imp = require('impitreq');
+          const p = imp.getLibPath();
+          if (!fs.existsSync(p)) throw new Error('lib not found: ' + p);
+          const lib = koffi.load(p);
+          console.log('koffi loaded:', p);
+          "@

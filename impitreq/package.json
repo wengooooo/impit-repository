@@ -1,0 +1,16 @@
+{
+  "name": "impitreq",
+  "version": "0.1.0",
+  "description": "Platform-aware distribution of the impitreq c-shared library",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "http://8.217.204.199:4873"
+  },
+  "main": "index.js",
+  "types": "index.d.ts",
+  "optionalDependencies": {
+    "impitreq-darwin-x64": "0.1.0",
+    "impitreq-linux-x64": "0.1.0",
+    "impitreq-win32-x64": "0.1.0"
+  }
+}

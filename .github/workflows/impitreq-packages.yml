@@ -39,7 +39,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          registry-url: 'http://8.217.204.199:4873'
+          registry-url: 'https://registry.npmjs.org'
       - name: Setup MSYS2 (Windows)
         uses: msys2/setup-msys2@v2
         with:
@@ -142,7 +142,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          registry-url: 'http://8.217.204.199:4873'
+          registry-url: 'https://registry.npmjs.org'
       - name: Install toolchain
         shell: bash
         run: |
@@ -222,7 +222,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          registry-url: 'http://8.217.204.199:4873'
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Resolve version
         id: ver

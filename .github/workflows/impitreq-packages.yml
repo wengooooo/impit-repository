@@ -18,6 +18,7 @@ jobs:
       NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       PLATFORM_PKG_DIR: impitreq-win32-x64
       OUT_NAME: impitreq.dll
+      GO111MODULE: on
     steps:
       - uses: actions/checkout@v4
       - name: Resolve version
@@ -109,6 +110,7 @@ jobs:
       NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       PLATFORM_PKG_DIR: impitreq-linux-x64
       OUT_NAME: impitreq.so
+      GO111MODULE: on
     steps:
       - uses: actions/checkout@v4
       - name: Resolve version

@@ -17,15 +17,15 @@ type Command struct {
 }
 
 //export ImpitHandleRequestJSON
-func ImpitHandleRequestJSON(input *C.char) *C.char {
+func ImpitHandleRequestJSON(input *C.char, output *C.char, maxLen C.int) C.int {
 	if input == nil {
-		return C.CString(`{"error":"nil input"}`)
+		return -1
 	}
 
 	var cmd Command
 	if err := json.Unmarshal([]byte(C.GoString(input)), &cmd); err != nil {
 		out, _ := json.Marshal(impit.ResponseData{Error: err.Error()})
-		return C.CString(string(out))
+		return copyToBuffer(out, output, maxLen)
 	}
 
 	client := impit.CreateClient(cmd.ClientOptions)
@@ -36,10 +36,24 @@ func ImpitHandleRequestJSON(input *C.char) *C.char {
 	enc.SetEscapeHTML(false)
 	if err := enc.Encode(resp); err != nil {
 		out, _ := json.Marshal(impit.ResponseData{Error: err.Error()})
-		return C.CString(string(out))
+		return copyToBuffer(out, output, maxLen)
 	}
 
-	return C.CString(buf.String())
+	return copyToBuffer(buf.Bytes(), output, maxLen)
+}
+
+func copyToBuffer(data []byte, output *C.char, maxLen C.int) C.int {
+	if len(data) >= int(maxLen) {
+		// Buffer too small, return required size (negative)
+		return C.int(-len(data))
+	}
+
+	// Copy data to C buffer
+	cBuf := unsafe.Slice((*byte)(unsafe.Pointer(output)), int(maxLen))
+	copy(cBuf, data)
+	cBuf[len(data)] = 0 // Null terminator
+
+	return C.int(len(data))
 }
 
 //export ImpitFreeCString

@@ -85,6 +85,13 @@ jobs:
             exit 0
           fi
           which gcc
+          GO_BIN="$(ls -d /c/hostedtoolcache/windows/go/*/x64/bin 2>/dev/null | head -n 1 || true)"
+          if [[ -d "$GO_BIN" ]]; then
+            export PATH="$GO_BIN:$PATH"
+          else
+            pacman -Sy --noconfirm go
+          fi
+          go version
           mkdir -p "${PLATFORM_PKG_DIR}"
           go env
           go build -tags=cshared -buildmode=c-shared -mod=mod -o "${PLATFORM_PKG_DIR}/${OUT_NAME}" ./pkg/impit/cmd/impitreq

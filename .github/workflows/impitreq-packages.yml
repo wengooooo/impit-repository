@@ -74,18 +74,20 @@ jobs:
           echo "has_go_mod=$HAS_GO_MOD" >> "$GITHUB_OUTPUT"
           echo "can_build=$CAN_BUILD" >> "$GITHUB_OUTPUT"
       - name: Build shared library (Windows)
-        shell: pwsh
+        shell: msys2 {0}
         env:
           CGO_ENABLED: 1
-          CC: C:\msys64\mingw64\bin\gcc.exe
+          CC: gcc
         run: |
-          $ErrorActionPreference = 'Stop'
-          if ('${{ steps.checksrc.outputs.can_build }}' -ne 'true') {
-            Write-Host 'Skipping Windows build: missing source/go files/go.mod'
+          set -euo pipefail
+          if [[ '${{ steps.checksrc.outputs.can_build }}' != 'true' ]]; then
+            echo 'Skipping Windows build: missing source/go files/go.mod'
             exit 0
-          }
-          New-Item -ItemType Directory -Force -Path "${{ env.PLATFORM_PKG_DIR }}" | Out-Null
-          go build -tags cshared -buildmode c-shared -mod mod -o "${{ env.PLATFORM_PKG_DIR }}/${{ env.OUT_NAME }}" ./pkg/impit/cmd/impitreq
+          fi
+          which gcc
+          mkdir -p "${PLATFORM_PKG_DIR}"
+          go env
+          go build -tags=cshared -buildmode=c-shared -mod=mod -o "${PLATFORM_PKG_DIR}/${OUT_NAME}" ./pkg/impit/cmd/impitreq
       - name: Set platform package version
         shell: bash
         env:

@@ -20,6 +20,16 @@ jobs:
       OUT_NAME: impitreq.dll
     steps:
       - uses: actions/checkout@v4
+      - name: Resolve version
+        id: ver
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_REF_TYPE:-}" == "tag" ]]; then
+            echo "version=${GITHUB_REF_NAME#impitreq-v}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+          fi
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
@@ -113,6 +123,16 @@ jobs:
       OUT_NAME: impitreq.so
     steps:
       - uses: actions/checkout@v4
+      - name: Resolve version
+        id: ver
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_REF_TYPE:-}" == "tag" ]]; then
+            echo "version=${GITHUB_REF_NAME#impitreq-v}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+          fi
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
@@ -164,7 +184,7 @@ jobs:
       - name: Set platform package version
         shell: bash
         env:
-          VERSION: ${{ needs.main.outputs.version }}
+          VERSION: ${{ steps.ver.outputs.version }}
         run: |
           set -euo pipefail
           if [[ -n "${VERSION:-}" ]]; then
@@ -222,7 +242,7 @@ jobs:
         run: |
           set -euo pipefail
           if [[ -n "${VERSION:-}" ]]; then
-            VERSION="$VERSION" node -e "const fs=require('fs'); const p='impitreq/package.json'; const j=JSON.parse(fs.readFileSync(p,'utf8')); if(!j.name) throw new Error('package.json missing name'); j.version=process.env.VERSION; j.optionalDependencies['impitreq-win32-x64']=process.env.VERSION; j.optionalDependencies['impitreq-linux-x64']=process.env.VERSION; j.optionalDependencies['impitreq-darwin-x64']=process.env.VERSION; fs.writeFileSync(p, JSON.stringify(j,null,2)+'\n');"
+            VERSION="$VERSION" node -e "const fs=require('fs'); const p='impitreq/package.json'; const j=JSON.parse(fs.readFileSync(p,'utf8')); if(!j.name) throw new Error('package.json missing name'); j.version=process.env.VERSION; j.optionalDependencies['impitreq-win32-x64']=process.env.VERSION; j.optionalDependencies['impitreq-linux-x64']=process.env.VERSION; delete j.optionalDependencies['impitreq-darwin-x64']; fs.writeFileSync(p, JSON.stringify(j,null,2)+'\n');"
           else
             echo 'No VERSION provided; keep existing impitreq/package.json version and optionalDependencies'
           fi

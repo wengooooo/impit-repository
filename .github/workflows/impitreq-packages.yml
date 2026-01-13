@@ -95,34 +95,12 @@ jobs:
           mkdir -p "${PLATFORM_PKG_DIR}"
           go env
           go build -tags=cshared -buildmode=c-shared -mod=mod -o "${PLATFORM_PKG_DIR}/${OUT_NAME}" ./pkg/impit/cmd/impitreq
-      - name: Set platform package version
-        shell: bash
-        env:
-          VERSION: ${{ steps.ver.outputs.version }}
-        run: |
-          set -euo pipefail
-          if [[ -n "${VERSION:-}" ]]; then
-            VERSION="$VERSION" node -e "const fs=require('fs'); const p='${{ env.PLATFORM_PKG_DIR }}/package.json'; const j=JSON.parse(fs.readFileSync(p,'utf8')); if(!j.name) throw new Error('package.json missing name'); j.version=process.env.VERSION; fs.writeFileSync(p, JSON.stringify(j,null,2)+'\n');"
-          else
-            echo "No VERSION provided; keep existing ${{ env.PLATFORM_PKG_DIR }}/package.json version"
-          fi
-      - name: Pack artifacts
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p artifacts
-          npm pack "./${{ env.PLATFORM_PKG_DIR }}" --pack-destination artifacts
-      - name: Upload artifacts
+      - name: Upload Windows lib
         uses: actions/upload-artifact@v4
         with:
-          name: impitreq-${{ env.PLATFORM_PKG_DIR }}
-          path: artifacts/*.tgz
-      - name: Publish (optional)
-        if: ${{ env.NODE_AUTH_TOKEN != '' }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          npm publish "./${{ env.PLATFORM_PKG_DIR }}"
+          name: win-lib
+          path: ${{ env.PLATFORM_PKG_DIR }}/${{ env.OUT_NAME }}
+      # Removed Windows package publish; publish happens in main job
 
   linux-centos:
     runs-on: ubuntu-latest
@@ -191,34 +169,12 @@ jobs:
           set -euo pipefail
           mkdir -p "${{ env.PLATFORM_PKG_DIR }}"
           CGO_ENABLED=1 go build -tags=cshared -buildmode=c-shared -mod=mod -o "${{ env.PLATFORM_PKG_DIR }}/${{ env.OUT_NAME }}" ./pkg/impit/cmd/impitreq
-      - name: Set platform package version
-        shell: bash
-        env:
-          VERSION: ${{ steps.ver.outputs.version }}
-        run: |
-          set -euo pipefail
-          if [[ -n "${VERSION:-}" ]]; then
-            VERSION="$VERSION" node -e "const fs=require('fs'); const p='${{ env.PLATFORM_PKG_DIR }}/package.json'; const j=JSON.parse(fs.readFileSync(p,'utf8')); if(!j.name) throw new Error('package.json missing name'); j.version=process.env.VERSION; fs.writeFileSync(p, JSON.stringify(j,null,2)+'\n');"
-          else
-            echo "No VERSION provided; keep existing ${{ env.PLATFORM_PKG_DIR }}/package.json version"
-          fi
-      - name: Pack artifacts
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p artifacts
-          npm pack "./${{ env.PLATFORM_PKG_DIR }}" --pack-destination artifacts
-      - name: Upload artifacts
+      - name: Upload Linux lib
         uses: actions/upload-artifact@v4
         with:
-          name: impitreq-${{ env.PLATFORM_PKG_DIR }}
-          path: artifacts/*.tgz
-      - name: Publish (optional)
-        if: ${{ env.NODE_AUTH_TOKEN != '' }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          npm publish "./${{ env.PLATFORM_PKG_DIR }}"
+          name: linux-lib
+          path: ${{ env.PLATFORM_PKG_DIR }}/${{ env.OUT_NAME }}
+      # Removed Linux package publish; publish happens in main job
 
   main:
     runs-on: ubuntu-latest
@@ -244,6 +200,22 @@ jobs:
           else
             echo "version=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
           fi
+      - name: Prepare prebuilds structure
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p impitreq/prebuilds/win32-x64
+          mkdir -p impitreq/prebuilds/linux-x64
+      - name: Download Windows lib
+        uses: actions/download-artifact@v4
+        with:
+          name: win-lib
+          path: impitreq/prebuilds/win32-x64
+      - name: Download Linux lib
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-lib
+          path: impitreq/prebuilds/linux-x64
 
       - name: Set main package version
         shell: bash
@@ -252,7 +224,7 @@ jobs:
         run: |
           set -euo pipefail
           if [[ -n "${VERSION:-}" ]]; then
-            VERSION="$VERSION" node -e "const fs=require('fs'); const p='impitreq/package.json'; const j=JSON.parse(fs.readFileSync(p,'utf8')); if(!j.name) throw new Error('package.json missing name'); j.version=process.env.VERSION; j.optionalDependencies['impitreq-win32-x64']=process.env.VERSION; j.optionalDependencies['impitreq-linux-x64']=process.env.VERSION; delete j.optionalDependencies['impitreq-darwin-x64']; fs.writeFileSync(p, JSON.stringify(j,null,2)+'\n');"
+            VERSION="$VERSION" node -e "const fs=require('fs'); const p='impitreq/package.json'; const j=JSON.parse(fs.readFileSync(p,'utf8')); if(!j.name) throw new Error('package.json missing name'); j.version=process.env.VERSION; fs.writeFileSync(p, JSON.stringify(j,null,2)+'\n');"
           else
             echo 'No VERSION provided; keep existing impitreq/package.json version and optionalDependencies'
           fi

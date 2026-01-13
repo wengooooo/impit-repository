@@ -5,9 +5,22 @@
   "license": "MIT",
   "main": "index.js",
   "types": "index.d.ts",
-  "optionalDependencies": {
-    "impitreq-darwin-x64": "0.1.0",
-    "impitreq-linux-x64": "0.1.0",
-    "impitreq-win32-x64": "0.1.0"
-  }
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "prebuilds/"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wengooooo/impit-repository"
+  },
+  "homepage": "https://github.com/wengooooo/impit-repository#readme",
+  "keywords": [
+    "impitreq",
+    "cgo",
+    "prebuilds",
+    "windows",
+    "linux"
+  ],
+  "author": "wengooooo"
 }

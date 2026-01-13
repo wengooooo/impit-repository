@@ -1,26 +1,23 @@
-function resolvePlatformPackage() {
+const path = require('path');
+
+function resolvePrebuildPath() {
   const platform = process.platform;
   const arch = process.arch;
 
-  if (platform === 'win32' && arch === 'x64') return 'impitreq-win32-x64';
-  if (platform === 'linux' && arch === 'x64') return 'impitreq-linux-x64';
-  if (platform === 'darwin' && arch === 'x64') return 'impitreq-darwin-x64';
-
+  if (platform === 'win32' && arch === 'x64') return path.join(__dirname, 'prebuilds', 'win32-x64', 'impitreq.dll');
+  if (platform === 'linux' && arch === 'x64') return path.join(__dirname, 'prebuilds', 'linux-x64', 'impitreq.so');
   throw new Error(`Unsupported platform: ${platform}-${arch}`);
 }
 
 function getLibPath() {
-  const platformPkg = resolvePlatformPackage();
-  const mod = require(platformPkg);
-  const libPath = mod && (mod.libPath || (typeof mod.getLibPath === 'function' ? mod.getLibPath() : undefined));
+  const libPath = resolvePrebuildPath();
   if (!libPath) {
-    throw new Error(`Platform package "${platformPkg}" did not export "libPath"`);
+    throw new Error('Prebuilt library path not resolved');
   }
   return libPath;
 }
 
 module.exports = {
   getLibPath,
-  resolvePlatformPackage,
+  resolvePrebuildPath,
 };
-

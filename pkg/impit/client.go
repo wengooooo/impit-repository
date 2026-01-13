@@ -23,10 +23,18 @@ type ImpitOptions struct {
 	ForceHTTP2         bool              `json:"force_http2,omitempty"`
 	DisableKeepAlives  bool              `json:"disable_keep_alives,omitempty"`
 	DisableCompression bool              `json:"disable_compression,omitempty"`
+	RetryCount         int               `json:"retry_count,omitempty"`
+	RetryWaitTime      int               `json:"retry_wait_time,omitempty"` // milliseconds
+	RetryOnStatus      []int             `json:"retry_on_status,omitempty"`
+	DisableCookieJar   bool              `json:"disable_cookie_jar,omitempty"`
 }
 
 func CreateClient(opts ImpitOptions) *req.Client {
 	c := req.C()
+
+	if opts.DisableCookieJar {
+		c.SetCookieJar(nil)
+	}
 
 	if opts.BaseURL != "" {
 		c.SetBaseURL(opts.BaseURL)
@@ -54,7 +62,12 @@ func CreateClient(opts ImpitOptions) *req.Client {
 
 	if opts.Browser == "chrome" {
 		c.ImpersonateChrome()
+	} else if opts.Browser == "firefox" {
+		c.ImpersonateFirefox()
+	} else if opts.Browser == "none" {
+		// Do not impersonate
 	} else {
+		// Default to Firefox for backward compatibility if empty or unknown
 		c.ImpersonateFirefox()
 	}
 
@@ -89,6 +102,43 @@ func CreateClient(opts ImpitOptions) *req.Client {
 
 	if len(opts.Headers) > 0 {
 		c.SetCommonHeaders(opts.Headers)
+	}
+
+	if opts.RetryCount > 0 {
+		c.SetCommonRetryCount(opts.RetryCount)
+		if opts.RetryWaitTime > 0 {
+			c.SetCommonRetryFixedInterval(time.Duration(opts.RetryWaitTime) * time.Millisecond)
+		}
+
+		// Configure retry condition if specific status codes are provided
+		if len(opts.RetryOnStatus) > 0 {
+			c.SetCommonRetryCondition(func(resp *req.Response, err error) bool {
+				// Always retry on network errors (default behavior)
+				if err != nil {
+					return true
+				}
+				// Retry on specified status codes
+				if resp != nil {
+					for _, status := range opts.RetryOnStatus {
+						if resp.StatusCode == status {
+							return true
+						}
+					}
+				}
+				return false
+			})
+		}
+
+		// Add retry hook for debugging
+		if opts.Debug {
+			c.SetCommonRetryHook(func(resp *req.Response, err error) {
+				if err != nil {
+					c.GetLogger().Warnf("Retrying due to error: %v", err)
+				} else if resp != nil {
+					c.GetLogger().Warnf("Retrying due to status: %d", resp.StatusCode)
+				}
+			})
+		}
 	}
 
 	return c

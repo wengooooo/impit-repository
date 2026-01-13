@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"unsafe"
 
-	"n8n-nodes-amazon/pkg/impit"
+	"impit/pkg/impit"
 )
 
 type Command struct {

@@ -1,6 +1,6 @@
 {
   "name": "impitreq",
-  "version": "0.1.25",
+  "version": "0.1.26",
   "description": "Platform-aware distribution of the impitreq c-shared library",
   "license": "MIT",
   "main": "index.js",

@@ -9,8 +9,5 @@ if (!fs.existsSync(p)) {
 }
 const lib = koffi.load(p);
 console.log('koffi loaded:', p);
-const handle = lib.func('ImpitHandleRequestJSON', 'str', ['str']);
-const result = handle('hello');
-console.log('ImpitHandleRequestJSON:', result);
 
 lib.func('ImpitHandleRequestJSON', 'str', ['str']);

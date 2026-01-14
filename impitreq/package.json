@@ -3,9 +3,6 @@
   "version": "0.1.25",
   "description": "Platform-aware distribution of the impitreq c-shared library",
   "license": "MIT",
-  "publishConfig": {
-    "registry": "http://8.217.204.199:4873"
-  },
   "main": "index.js",
   "types": "index.d.ts",
   "files": [

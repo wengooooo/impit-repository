@@ -3,6 +3,7 @@ package impit
 import (
 	"context"
 	"encoding/base64"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -10,6 +11,9 @@ import (
 )
 
 func HandleRequest(client *req.Client, opts RequestInit) ResponseData {
+
+	fmt.Println("[Go] HandleRequest called")
+	fmt.Printf("[Go] Requesting URL: %s\n", opts.URL)
 	r := client.R()
 
 	if opts.Timeout > 0 {

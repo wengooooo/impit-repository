@@ -18,7 +18,6 @@ jobs:
       NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       PLATFORM_PKG_DIR: impitreq-win32-x64
       OUT_NAME: impitreq.dll
-      GO111MODULE: on
     steps:
       - uses: actions/checkout@v4
       - name: Resolve version
@@ -34,7 +33,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.24.x'
+          go-version: '1.22.x'
           cache: false
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -110,7 +109,6 @@ jobs:
       NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       PLATFORM_PKG_DIR: impitreq-linux-x64
       OUT_NAME: impitreq.so
-      GO111MODULE: on
     steps:
       - uses: actions/checkout@v4
       - name: Resolve version
@@ -126,7 +124,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.24.x'
+          go-version: '1.22.x'
           cache: false
       - name: Setup Node
         uses: actions/setup-node@v4

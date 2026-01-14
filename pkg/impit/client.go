@@ -62,10 +62,6 @@ func CreateClient(opts ImpitOptions) *req.Client {
 
 	if opts.Browser == "chrome" {
 		c.ImpersonateChrome()
-	} else if opts.Browser == "firefox" {
-		c.ImpersonateFirefox()
-	} else if opts.Browser == "none" {
-		// Do not impersonate
 	} else {
 		// Default to Firefox for backward compatibility if empty or unknown
 		c.ImpersonateFirefox()

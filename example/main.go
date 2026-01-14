@@ -19,7 +19,7 @@ func main() {
 		// RetryWaitTime:   1000,
 		RetryOnStatus:   []int{500, 502, 503},
 		FollowRedirects: ptr(true),
-		Debug:           true,
+		Debug:           false,
 		ProxyURL:        "http://127.0.0.1:8080",
 	}
 

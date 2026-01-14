@@ -1,8 +1,11 @@
 {
   "name": "impitreq-linux-x64",
-  "version": "0.1.0",
+  "version": "0.1.23",
   "description": "Linux x64 binary for impitreq",
   "license": "MIT",
+  "publishConfig": {
+    "registry": "http://8.217.204.199:4873"
+  },
   "main": "index.js",
   "os": [
     "linux"

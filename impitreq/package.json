@@ -1,6 +1,6 @@
 {
   "name": "impitreq",
-  "version": "0.1.23",
+  "version": "0.1.24",
   "description": "Platform-aware distribution of the impitreq c-shared library",
   "license": "MIT",
   "publishConfig": {
@@ -9,8 +9,8 @@
   "main": "index.js",
   "types": "index.d.ts",
   "optionalDependencies": {
-    "impitreq-darwin-x64": "0.1.23",
-    "impitreq-linux-x64": "0.1.23",
-    "impitreq-win32-x64": "0.1.23"
+    "impitreq-darwin-x64": "0.1.24",
+    "impitreq-linux-x64": "0.1.24",
+    "impitreq-win32-x64": "0.1.24"
   }
 }

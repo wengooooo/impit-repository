@@ -1,6 +1,6 @@
 {
   "name": "impitreq-win32-x64",
-  "version": "0.1.23",
+  "version": "0.1.24",
   "description": "Windows x64 binary for impitreq",
   "license": "MIT",
   "publishConfig": {

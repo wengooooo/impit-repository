@@ -1,26 +1,33 @@
-function resolvePlatformPackage() {
-  const platform = process.platform;
-  const arch = process.arch;
-
-  if (platform === 'win32' && arch === 'x64') return 'impitreq-win32-x64';
-  if (platform === 'linux' && arch === 'x64') return 'impitreq-linux-x64';
-  if (platform === 'darwin' && arch === 'x64') return 'impitreq-darwin-x64';
-
-  throw new Error(`Unsupported platform: ${platform}-${arch}`);
-}
+const path = require('path');
+const fs = require('fs');
 
 function getLibPath() {
-  const platformPkg = resolvePlatformPackage();
-  const mod = require(platformPkg);
-  const libPath = mod && (mod.libPath || (typeof mod.getLibPath === 'function' ? mod.getLibPath() : undefined));
-  if (!libPath) {
-    throw new Error(`Platform package "${platformPkg}" did not export "libPath"`);
+  const platform = process.platform;
+  const arch = process.arch;
+  
+  let folder = '';
+  let file = '';
+
+  if (platform === 'win32' && arch === 'x64') {
+    folder = 'win32-x64';
+    file = 'impitreq.dll';
+  } else if (platform === 'linux' && arch === 'x64') {
+    folder = 'linux-x64';
+    file = 'impitreq.so';
+  } else if (platform === 'darwin' && arch === 'x64') {
+    folder = 'darwin-x64';
+    file = 'impitreq.dylib';
+  } else {
+    throw new Error(`Unsupported platform: ${platform}-${arch}`);
+  }
+
+  const libPath = path.join(__dirname, 'prebuilds', folder, file);
+  if (!fs.existsSync(libPath)) {
+    throw new Error(`Library not found at: ${libPath}.`);
   }
   return libPath;
 }
 
 module.exports = {
-  getLibPath,
-  resolvePlatformPackage,
+  getLibPath
 };
-
